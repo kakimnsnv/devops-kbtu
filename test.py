@@ -85,13 +85,20 @@ class UserManagementCLI:
 
     def move_selection(self, direction):
         new_index = self.selected_index + direction
-        self.selected_index = max(0, min(new_index, len(self.users) - 1))
+        if new_index >= (self.ITEMS_PER_PAGE * self.page):
+            self.change_page(1)
+            self.selected_index = (self.page - 1) * self.ITEMS_PER_PAGE
+        elif new_index < (self.page - 1) * self.ITEMS_PER_PAGE:
+            self.change_page(-1)
+            self.selected_index = min(len(self.users) - 1, self.page * self.ITEMS_PER_PAGE - 1)
+        else:
+            self.selected_index = new_index
 
     def change_page(self, direction):
         new_page = self.page + direction
         if 1 <= new_page <= self.total_pages:
             self.page = new_page
-            self.selected_index = (self.page - 1) * self.ITEMS_PER_PAGE
+            self.selected_index = min(self.selected_index, len(self.users) - 1)
 
     def run(self):
         with self.term.fullscreen(), self.term.cbreak(), self.term.hidden_cursor():
